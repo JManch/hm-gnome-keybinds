@@ -5,7 +5,6 @@ let
     mkOption
     mapAttrs
     foldl'
-    optional
     foldlAttrs
     imap0
     listToAttrs
@@ -27,10 +26,11 @@ in
           acc
           // {
             ${bind} = mkOption {
-              type = types.nullOr types.str;
+              type = with types; nullOr (either str (listOf str));
               default = null;
+              apply = v: if (builtins.typeOf v) == "string" then [ v ] else v;
               example = "<Super>1";
-              description = "Binding for ${bind}. Set to empty string to remove the default binding.";
+              description = "Binding for ${bind}. Set to empty list to remove the default binding.";
             };
           }
         ) { } schemaBinds)
@@ -65,9 +65,9 @@ in
         foldl' (
           acc: bind:
           let
-            key = cfg.binds.${bind};
+            keys = cfg.binds.${bind};
           in
-          acc // optionalAttrs (key != null) { ${bind} = optional (key != "") key; }
+          acc // optionalAttrs (keys != null) { ${bind} = keys; }
         ) { } binds
       ) schemas;
 
