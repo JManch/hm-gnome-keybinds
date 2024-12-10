@@ -1,6 +1,7 @@
 { lib, config, ... }:
 let
   inherit (lib)
+    mkMerge
     types
     mkOption
     mapAttrs
@@ -84,5 +85,9 @@ in
         );
       };
     in
-    schemaBinds // customBinds // customBindDefs;
+    mkMerge [
+      schemaBinds
+      customBinds
+      customBindDefs
+    ];
 }
